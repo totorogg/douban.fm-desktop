@@ -26,14 +26,17 @@ class MainWin(wx.Panel):
         """Constructor"""
         wx.Panel.__init__(self, parent=parent)
         self.frame = parent
+        
+        self.createAllWidgets()
+        self.layoutWidgets()
+        self.bindWidgetsEvent()
+        
         self.douban = DoubanProtocol()
         # hard coding for test
         # 0 int, 1 play, 2 pause, 3 stop
         self.state = 0
 
-        self.createAllWidgets()
-        self.layoutWidgets()
-        self.bindWidgetsEvent()
+
         
         self.createMenuBar()
         self.createPlayerUI()
