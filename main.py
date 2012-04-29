@@ -11,13 +11,12 @@
 
 import wx
 
-from player import AudioPlayer
 from mainwin import MainWin
 
 class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, wx.ID_ANY, "Python Music Radio")
-        self.SetSize((240,160))
+        self.SetSize((500,160))
         # player
         #self.player = AudioPlayer(self)
         # playlist

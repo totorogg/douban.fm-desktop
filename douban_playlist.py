@@ -14,7 +14,7 @@ import json
 from douban import DoubanProtocol
 
 class DoubanPlayList:
-    def __init__(self, channel = 61):
+    def __init__(self, channel = 1):
         self.channel = channel
         self.length = 0
         self.currentSong = 0
