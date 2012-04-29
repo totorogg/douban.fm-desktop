@@ -50,23 +50,28 @@ class PlayerNotifier:
 
 
 #class AudioPlayer(wx.media.MediaCtrl, threading.Thread):
-class AudioPlayer(wx.Panel, threading.Thread):
-    def __init__(self, parent, notifier):
-        wx.Panel.__init__(self, parent=parent)
-        self.parent = parent
+#class AudioPlayer(wx.Panel, threading.Thread):
+class PlayBack:
+    def __init__(self, parent):
+        #wx.Panel.__init__(self, parent=parent)
+        #self.parent = parent
         self.state = PLAYER_STATE_IDLE
-        self.nt = notifier;
-        self.mc = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
+        #self.nt = notifier;
+        #self.mc = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
+        
+        self.mediaPlayer = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
         try:
-            threading.Thread.__init__(self) 
+        #    threading.Thread.__init__(self) 
 #            wx.media.MediaCtrl.__init__(self, parent=parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_QUICKTIME)
             #bind event, todo
-            self.mc.Bind(wx.media.EVT_MEDIA_FINISHED, self.onSongEnd)
+            self.mediaPlayer = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
+            self.mediaPlayer.Bind(wx.media.EVT_MEDIA_FINISHED, self.onSongEnd)
+            self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         except NotImplementedError:
             self.Destroy()
             raise
-        self.mc.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
-        
+    
+    
     def OnMediaLoaded(self, event):
         print "Loading ----> Loaded"
         self.play()
@@ -75,29 +80,28 @@ class AudioPlayer(wx.Panel, threading.Thread):
         print "song end"
         self.playNextSong()
 
-    def run(self):
-        while True:
-            if self.state == PLAYER_STATE_LOADING:
-                print "STATE:LOADING"
-            elif self.state == PLAYER_STATE_PLAYING:
-                print "STATE:PLAYING"
-            elif self.state == PLAYER_STATE_PAUSED:
-                print "STATE:PAUSED"
-            elif self.state == PLAYER_STATE_STOPPED:
-                print "STATE:STOPPED"
-            else:
-                print ""
-            self.nt.update(self)
-            time.sleep(4)
-            
+    #def run(self):
+    #    while True:
+    #        if self.state == PLAYER_STATE_LOADING:
+    #            print "STATE:LOADING"
+    #        elif self.state == PLAYER_STATE_PLAYING:
+    #            print "STATE:PLAYING"
+    #        elif self.state == PLAYER_STATE_PAUSED:
+    #            print "STATE:PAUSED"
+    #        elif self.state == PLAYER_STATE_STOPPED:
+    #            print "STATE:STOPPED"
+    #        else:
+    #            print ""
+    #        self.nt.update(self)
+    #        time.sleep(4)
+    #        
              
-    def toState(self,state):    
+    def toState(self,state):
         self.state = state
-    
     
     def load(self, song):
 #        song1="F:/tears.mp3"
-        if not self.mc.LoadURI(song):
+        if not self.mediaPlayer.LoadURI(song):
             print "Error in Loading [%s]" % song
         else:
             self.parent.Refresh()
@@ -107,15 +111,15 @@ class AudioPlayer(wx.Panel, threading.Thread):
         self.toState(PLAYER_STATE_LOADING)
         
     def play(self):
-        self.mc.Play()
+        self.mediaPlayer.Play()
         self.toState(PLAYER_STATE_PLAYING)
         
     def pause(self):
-        self.mc.Pause()
+        self.mediaPlayer.Pause()
         self.toState(PLAYER_STATE_PAUSED)
         
     def stop(self):
-        self.mc.Stop()
+        self.mediaPlayer.Stop()
         self.toState(PLAYER_STATE_STOPPED)
         
     
@@ -133,6 +137,7 @@ class AudioPlayer(wx.Panel, threading.Thread):
     
     def get_passtime(self):
         pass
+    
 # create the audio player app
 class MyApp(wx.App, wx.Frame):
     """

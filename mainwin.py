@@ -16,6 +16,7 @@ import wx.media
 
 from douban import DoubanProtocol
 from douban_playlist import DoubanPlayList
+from playback import PlayBack
 
 class MainWin(wx.Panel):
     """
@@ -27,20 +28,24 @@ class MainWin(wx.Panel):
         wx.Panel.__init__(self, parent=parent)
         self.frame = parent
         
+        self.douban = DoubanProtocol()
+        self.playback = PlayBack(self)
+        
         self.createAllWidgets()
         self.layoutWidgets()
         self.bindWidgetsEvent()
+        self.createMenuBar()
+        self.createStatusBar()
         
-        self.douban = DoubanProtocol()
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.onTimer)
+        self.timer.Start(1000)
+        
+        
         # hard coding for test
         # 0 int, 1 play, 2 pause, 3 stop
-        self.state = 0
+        #self.state = 0
 
-
-        
-        self.createMenuBar()
-        self.createPlayerUI()
-        self.createStatusBar()
     
     def createMenuBar(self):
         """
@@ -79,12 +84,20 @@ class MainWin(wx.Panel):
         #self.channel = event.GetId()
         channel = event.GetId()
         self.doubanPlayList.changeChannel(channel)
+        menu_item = self.frame.GetMenuBar().FindItemById(channel)
+        self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
     
-    def createPlayerUI(self):
-        self.createSongInfoPanel()
-        self.createProgressSlider()
-        self.createControlToolbar()
-        pass
+    
+    def onTimer(self, event):
+        """
+        Keeps the player slider updated
+        """
+        
+        #offset = self.mediaPlayer.Tell()
+        #self.playbackSlider.SetValue(offset)
+        
+        #update status bar
+        #self.statusbar.SetStatusText("channel", 0)
     
     def createStatusBar(self):
         self.statusbar = self.frame.CreateStatusBar(number=3)
@@ -93,17 +106,6 @@ class MainWin(wx.Panel):
         self.statusbar.SetStatusText("status", 2)
         self.statusbar.SetStatusWidths([-1, -3, -1])
         self.statusbar.SetStatusText("Playing", 2)
-        pass
-    
-    def createSongInfoPanel(self):
-        pass
-    
-    def createProgressSlider(self):
-        #self.playbackSlider = wx.Slider(self, size=wx.DefaultSize)
-        #self.Bind(wx.EVT_SLIDER, self.onSeek, self.playbackSlider)
-        pass
-    
-    def createControlToolbar(self):
         pass
     
     
@@ -116,13 +118,13 @@ class MainWin(wx.Panel):
         self.mainwin_pause = wx.Button(self, -1, "||", size=(36,24))
         self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
 
-        self.mainwin_volume = wx.Slider(self, size=(120,24))
+        self.mainwin_volume = wx.Slider(self, size=(240,24))
         self.mainwin_seeking = wx.Slider(self, size=(240,24))
         #
         self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
         self.mainwin_album = wx.StaticText(self, -1, size=(120,24))
-        self.mainwin_song = wx.StaticText(self, -1, "Volume", size=(120,24))
-        # status window
+        self.mainwin_tsong = wx.StaticText(self, -1, "Volume", size=(60,24))
+        self.mainwin_tseeking = wx.StaticText(self, -1, "Position", size=(60,24))
         
         try:
             self.mediaPlayer = wx.media.MediaCtrl(self, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
@@ -135,20 +137,21 @@ class MainWin(wx.Panel):
     def layoutWidgets(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        infoSizer = wx.BoxSizer(wx.HORIZONTAL)
+        #infoSizer = wx.BoxSizer(wx.HORIZONTAL)
         volumeSizer = wx.BoxSizer(wx.HORIZONTAL)
         seekingSizer = wx.BoxSizer(wx.HORIZONTAL)
         playbackSizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        mainSizer.Add(infoSizer)
+        #mainSizer.Add(infoSizer)
         mainSizer.Add(volumeSizer)
         mainSizer.Add(seekingSizer)
         mainSizer.Add(playbackSizer)
         
         #infoSizer.Add(self.mainwin_singer)
         #infoSizer.Add(self.mainwin_album)
-        volumeSizer.Add(self.mainwin_song)
+        volumeSizer.Add(self.mainwin_tsong)
         volumeSizer.Add(self.mainwin_volume)
+        seekingSizer.Add(self.mainwin_tseeking)
         seekingSizer.Add(self.mainwin_seeking)
         playbackSizer.Add(self.mainwin_rew)
         playbackSizer.Add(self.mainwin_play)
@@ -162,8 +165,12 @@ class MainWin(wx.Panel):
     
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
-        self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
+        #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         pass
+    
+    
+    
+    
     
     def OnMediaLoaded(self, event):
         print "Loading ----> Loaded"
