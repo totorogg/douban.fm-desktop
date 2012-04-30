@@ -119,17 +119,11 @@ class MainWin(wx.Panel):
         
         self.mainwin_seeking = wx.Slider(self, size=(240,24))
         #
-        self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
-        self.mainwin_album = wx.StaticText(self, -1, size=(120,24))
-        self.mainwin_tsong = wx.StaticText(self, -1, "Volume", size=(60,24))
-        self.mainwin_tseeking = wx.StaticText(self, -1, "Position", size=(60,24))
+        #self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
+        #self.mainwin_album = wx.StaticText(self, -1, size=(120,24))
+        self.mainwin_tsong = wx.StaticText(self, -1, "Volume[50 - 100]", size=(120,24))
+        self.mainwin_tseeking = wx.StaticText(self, -1, "Position[00:00 - 00:00]", size=(120,24))
         
-        try:
-            self.mediaPlayer = wx.media.MediaCtrl(self, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
-            #self.Bind(wx.media.EVT_MEDIA_FINISHED, self.onSongEnd, self.mediaPlayer)
-        except NotImplementedError:
-            self.Destroy()
-            raise
         pass
     
     def layoutWidgets(self):
@@ -164,6 +158,7 @@ class MainWin(wx.Panel):
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
         self.mainwin_volume.Bind(wx.EVT_SLIDER, self.onSetVolume)
+        self.mainwin_seeking.Bind(wx.EVT_SLIDER, self.onSeek)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         pass
     
@@ -175,6 +170,15 @@ class MainWin(wx.Panel):
         #
         if state == PlayBack.PLAYER_STATE_SONGEND:
             self.loadNextSong()
+        
+        #show the volume
+        #show current position
+        offset = self.playback.get_passtime()
+        length = self.playback.get_length()
+        self.mainwin_seeking.SetValue(offset)
+        sec_length = int(length / 1000.0)
+        sec_offset = int(offset / 1000.0)
+        self.mainwin_tseeking.SetLabel("Position[%d:%02d - %d:%02d]" % (sec_offset/60, sec_offset%60, sec_length/60, sec_length%60))
         pass
     
     def onPlay(self, event):
@@ -197,3 +201,14 @@ class MainWin(wx.Panel):
         currentVolume = self.mainwin_volume.GetValue()
         print "setting volume to: %s" % int(currentVolume)
         self.playback.setVolume(currentVolume)
+        self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
+    
+    def onSeek(self, event):
+        """
+        Seeks the media file according to the amount the slider has
+        been adjusted.
+        """
+        offset = self.mainwin_seeking.GetValue()
+        self.playback.set_passtime(offset)
+        pass
+        

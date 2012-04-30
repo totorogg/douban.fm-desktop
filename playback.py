@@ -45,6 +45,7 @@ class PlayBack:
         # create the media ctrl object
         try:
             self.mediaPlayer = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
+            #self.mediaPlayer = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER)
             self.mediaPlayer.Bind(wx.media.EVT_MEDIA_FINISHED, self.onSongEnd)
             self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         except NotImplementedError:
@@ -55,6 +56,7 @@ class PlayBack:
         self.parent = parent
         self.volume = 50
         self.setVolume()
+        self.length = 0
         #self.playlist = playlist
     
     def toState(self,state):
@@ -105,6 +107,14 @@ class PlayBack:
         pass
     
     def get_passtime(self):
+        offset = self.mediaPlayer.Tell()
+        return offset
+    
+    def get_length(self):
+        return self.length
+    
+    def set_passtime(self, offset):
+        self.mediaPlayer.Seek(offset)
         pass
     
     #--------------------------------------------------------------------------#
@@ -123,6 +133,9 @@ class PlayBack:
         print "Loading ----> Loaded"
         self.toState(PlayBack.PLAYER_STATE_LOADED)
         self.mediaPlayer.SetInitialSize()
+        # to be done [tag need modify]
+        self.length = self.mediaPlayer.Length()
+        self.parent.mainwin_seeking.SetRange(0, self.length)
         self.play()
 
     def onSongEnd(self, event):
