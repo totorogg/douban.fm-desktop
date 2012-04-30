@@ -137,8 +137,9 @@ class PlayBack:
         Pause the current track.
         It works only in state [PLAYER_STATE_PLAYING]
         '''
-        self.mediaPlayer.Pause()
-        self.toState(PlayBack.PLAYER_STATE_PAUSED)
+        if self.state == PlayBack.PLAYER_STATE_PLAYING:
+            self.mediaPlayer.Pause()
+            self.toState(PlayBack.PLAYER_STATE_PAUSED)
         
     def stop(self):
         '''
