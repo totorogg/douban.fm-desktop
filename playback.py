@@ -77,7 +77,7 @@ class PlayBack:
     
     def setVolume(self, volume=50):
         self.volume = volume
-        self.mediaPlayer.SetVolume(self.volume)
+        self.mediaPlayer.SetVolume(self.volume * 0.01)
     
     # media player contrl, play, pause, stop, ff, fb, volume
     def play(self):
@@ -146,6 +146,7 @@ class PlayBack:
         self.length = self.mediaPlayer.Length()
         self.parent.mainwin_seeking.SetRange(0, self.length)
         self.play()
+        self.parent.UIUpdate()
 
     def onSongEnd(self, event):
         print "song end"

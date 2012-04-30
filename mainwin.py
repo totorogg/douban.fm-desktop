@@ -81,7 +81,25 @@ class MainWin(wx.Panel):
         #self.statusbar.SetStatusText("song", 2)
         #self.statusbar.SetStatusText("status", 3)
         self.statusbar.SetStatusWidths([-1, -1, -3, -1])
-        #self.statusbar.SetStatusText("Playing", 3)
+        self.updateStatusBar()
+        pass
+    
+    def updateStatusBar(self):
+        #update status bar
+        
+        self.statusbar.SetStatusText(self.douban.getChannelList()[self.doubanPlayList.channel], 0)
+        song = self.doubanPlayList.currentSong()
+        if song == None:
+            self.statusbar.SetStatusText("", 1)
+            self.statusbar.SetStatusText("", 2)
+        else:
+            self.statusbar.SetStatusText(song['artist'], 1)
+            self.statusbar.SetStatusText(song['title'], 2)
+        state = self.playback.getState()
+        self.statusbar.SetStatusText(self.playback.getTextState(state), 3)
+        
+    def UIUpdate(self):
+        self.updateStatusBar()
         pass
     
     
@@ -168,16 +186,6 @@ class MainWin(wx.Panel):
         sec_offset = int(offset / 1000.0)
         self.mainwin_tseeking.SetLabel("Position[%d:%02d - %d:%02d]" % (sec_offset/60, sec_offset%60, sec_length/60, sec_length%60))
         
-        #update status bar
-        self.statusbar.SetStatusText(self.douban.getChannelList()[self.doubanPlayList.channel], 0)
-        song = self.doubanPlayList.currentSong()
-        if song == None:
-            self.statusbar.SetStatusText("", 1)
-            self.statusbar.SetStatusText("", 2)
-        else:
-            self.statusbar.SetStatusText(song['artist'], 1)
-            self.statusbar.SetStatusText(song['title'], 2)
-        self.statusbar.SetStatusText(self.playback.getTextState(state), 3)
         pass
     
     def onPlay(self, event):
@@ -186,18 +194,23 @@ class MainWin(wx.Panel):
             self.loadNextSong()
         else:
             self.playback.play()
-        pass
+        self.UIUpdate()
     
     def onPause(self, event):
         self.playback.pause()
+        self.UIUpdate()
     
     def onStop(self, event):
         self.playback.stop()
+        self.UIUpdate()
     
     def loadNextSong(self):
         song = self.doubanPlayList.nextSong()
         print song['url']
         self.playback.load(song['url'])
+        self.UIUpdate()
+        
+        
     
     def onSetVolume(self, event):
         """
@@ -205,7 +218,7 @@ class MainWin(wx.Panel):
         """
         currentVolume = self.mainwin_volume.GetValue()
         print "setting volume to: %s" % int(currentVolume)
-        self.playback.setVolume(currentVolume * 0.01)
+        self.playback.setVolume(currentVolume)
         self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
     
     def onSeek(self, event):
@@ -237,15 +250,15 @@ class MainWin(wx.Panel):
         if state == PlayBack.PLAYER_STATE_PLAYING:
             self.onPlay(None)
         
+        self.UIUpdate()
         
     def onFwd(self, event):
         '''
         Play Next Track
         '''
-        song = self.doubanPlayList.nextSong()
-        self.playback.load(song['url'])
-        #
-        #update the GUI 
-        #
+        state = self.playback.getState()
+        if state == PlayBack.PLAYER_STATE_PLAYING or state == PlayBack.PLAYER_STATE_PAUSED:
+            self.loadNextSong()
+        self.UIUpdate()
         pass
 
