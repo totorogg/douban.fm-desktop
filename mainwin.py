@@ -246,7 +246,7 @@ class MainWin(wx.Panel):
         state = self.playback.getState()
         
         #self.playback.stop()
-        if state == PlayBack.PLAYER_STATE_PLAYING:
+        if state == PlayBack.PLAYER_STATE_PLAYING or state == PlayBack.PLAYER_STATE_PAUSED:
             #self.onPlay(None)
             self.loadNextSong()
         
