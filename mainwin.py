@@ -71,28 +71,6 @@ class MainWin(wx.Panel):
         self.frame.SetMenuBar(menubar)
         pass
     
-        #----------------------------------------------------------------------
-    def onChangeChannel(self, event):
-        """
-        change the channel
-        """
-        #self.channel = event.GetId()
-        channel = event.GetId()
-        self.doubanPlayList.changeChannel(channel)
-        menu_item = self.frame.GetMenuBar().FindItemById(channel)
-        self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
-    
-    
-    def onTimer(self, event):
-        """
-        Keeps the player slider updated
-        """
-        
-        #offset = self.mediaPlayer.Tell()
-        #self.playbackSlider.SetValue(offset)
-        
-        #update status bar
-        #self.statusbar.SetStatusText("channel", 0)
     
     def createStatusBar(self):
         self.statusbar = self.frame.CreateStatusBar(number=4)
@@ -223,4 +201,25 @@ class MainWin(wx.Panel):
         offset = self.mainwin_seeking.GetValue()
         self.playback.set_passtime(offset)
         pass
+    
+    #----------------------------------------------------------------------
+    def onChangeChannel(self, event):
+        """
+        change the channel
+        """
+        #self.channel = event.GetId()
+        channel = event.GetId()
+        self.doubanPlayList.changeChannel(channel)
+        #menu_item = self.frame.GetMenuBar().FindItemById(channel)
+        #self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
+        #if state == PlayBack.PLAYER_STATE_SONGEND:
+        #    self.loadNextSong()
+        
+        #saving current sate
+        state = self.playback.getState()
+        
+        self.playback.stop()
+        if state == PlayBack.PLAYER_STATE_PLAYING:
+            self.onPlay(None)
+        
         
