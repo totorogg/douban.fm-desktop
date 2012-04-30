@@ -31,6 +31,11 @@ class DoubanPlayList:
         return playlist
     #
     def nextSong(self):
+        """
+        get next song in the playlist
+        if current list is exhaused, auto fetch next playlist
+        return a song object
+        """
         if self.currentSongIndex >= self.length:
             self.playlist = self.nextPlayList()
         song = self.playlist[self.currentSongIndex]
@@ -78,7 +83,10 @@ class Song:
         pass
         
     def getURL(self):
-        pass
+        """
+        return the URL of the song
+        """
+        return self['url']
 
 
 
