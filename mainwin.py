@@ -1,4 +1,4 @@
-#!/usr/bin/python
+﻿#!/usr/bin/python
 # coding=utf-8
 
 #----------------------------------------------------------------------
@@ -41,6 +41,8 @@ class MainWin(wx.Panel):
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer)
         self.timer.Start(100)
+        
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
     
     def createMenuBar(self):
         """
@@ -71,28 +73,6 @@ class MainWin(wx.Panel):
         self.frame.SetMenuBar(menubar)
         pass
     
-        #----------------------------------------------------------------------
-    def onChangeChannel(self, event):
-        """
-        change the channel
-        """
-        #self.channel = event.GetId()
-        channel = event.GetId()
-        self.doubanPlayList.changeChannel(channel)
-        menu_item = self.frame.GetMenuBar().FindItemById(channel)
-        self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
-    
-    
-    def onTimer(self, event):
-        """
-        Keeps the player slider updated
-        """
-        
-        #offset = self.mediaPlayer.Tell()
-        #self.playbackSlider.SetValue(offset)
-        
-        #update status bar
-        #self.statusbar.SetStatusText("channel", 0)
     
     def createStatusBar(self):
         self.statusbar = self.frame.CreateStatusBar(number=4)
@@ -109,10 +89,10 @@ class MainWin(wx.Panel):
         # playback
         self.mainwin_rew = wx.Button(self, -1, "|<", size=(36,24))
         self.mainwin_fwd = wx.Button(self, -1, ">|", size=(36,24))
-        self.mainwin_eject = wx.Button(self, -1, u"?", size=(36,24))
+        self.mainwin_eject = wx.Button(self, -1, u"E", size=(36,24))
         self.mainwin_play = wx.Button(self, -1, ">", size=(36,24))
         self.mainwin_pause = wx.Button(self, -1, "||", size=(36,24))
-        self.mainwin_stop = wx.Button(self, -1, u"?", size=(36,24))
+        self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
 
         self.mainwin_volume = wx.Slider(self, size=(240,24))
         self.mainwin_volume.SetRange(0, 100)
@@ -158,13 +138,20 @@ class MainWin(wx.Panel):
     
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
+        self.mainwin_pause.Bind(wx.EVT_BUTTON, self.onPause)
+        self.mainwin_stop.Bind(wx.EVT_BUTTON, self.onStop)
         self.mainwin_volume.Bind(wx.EVT_SLIDER, self.onSetVolume)
         self.mainwin_seeking.Bind(wx.EVT_SLIDER, self.onSeek)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         self.mainwin_fwd.Bind(wx.EVT_BUTTON, self.onFwd)
+        
     
     
 #------------------------------------------------------------------------------#
+    
+    def OnClose(self, event):
+        self.timer.stop()
+        pass
     
     def onTimer(self, event):
         state = self.playback.getState()
@@ -200,7 +187,13 @@ class MainWin(wx.Panel):
         else:
             self.playback.play()
         pass
-        
+    
+    def onPause(self, event):
+        self.playback.pause()
+    
+    def onStop(self, event):
+        self.playback.stop()
+    
     def loadNextSong(self):
         song = self.doubanPlayList.nextSong()
         print song['url']
@@ -223,6 +216,27 @@ class MainWin(wx.Panel):
         offset = self.mainwin_seeking.GetValue()
         self.playback.set_passtime(offset)
         pass
+    
+    #----------------------------------------------------------------------
+    def onChangeChannel(self, event):
+        """
+        change the channel
+        """
+        #self.channel = event.GetId()
+        channel = event.GetId()
+        self.doubanPlayList.changeChannel(channel)
+        #menu_item = self.frame.GetMenuBar().FindItemById(channel)
+        #self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
+        #if state == PlayBack.PLAYER_STATE_SONGEND:
+        #    self.loadNextSong()
+        
+        #saving current sate
+        state = self.playback.getState()
+        
+        self.playback.stop()
+        if state == PlayBack.PLAYER_STATE_PLAYING:
+            self.onPlay(None)
+        
         
     def onFwd(self, event):
         '''
@@ -234,3 +248,4 @@ class MainWin(wx.Panel):
         #update the GUI 
         #
         pass
+
