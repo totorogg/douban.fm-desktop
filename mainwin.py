@@ -114,6 +114,9 @@ class MainWin(wx.Panel):
         self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
 
         self.mainwin_volume = wx.Slider(self, size=(240,24))
+        self.mainwin_volume.SetRange(0, 100)
+        self.mainwin_volume.SetValue(50)
+        
         self.mainwin_seeking = wx.Slider(self, size=(240,24))
         #
         self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
@@ -160,8 +163,12 @@ class MainWin(wx.Panel):
     
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
+        self.mainwin_volume.Bind(wx.EVT_SLIDER, self.onSetVolume)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         pass
+    
+    
+#------------------------------------------------------------------------------#
     
     def onTimer(self, event):
         state = self.playback.getState()
@@ -182,4 +189,11 @@ class MainWin(wx.Panel):
         song = self.doubanPlayList.nextSong()
         print song['url']
         self.playback.load(song['url'])
-        
+    
+    def onSetVolume(self, event):
+        """
+        Sets the volume of the music player
+        """
+        currentVolume = self.mainwin_volume.GetValue()
+        print "setting volume to: %s" % int(currentVolume)
+        self.playback.setVolume(currentVolume)

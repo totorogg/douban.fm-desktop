@@ -53,6 +53,8 @@ class PlayBack:
         
         self.state = PlayBack.PLAYER_STATE_IDLE
         self.parent = parent
+        self.volume = 50
+        self.setVolume()
         #self.playlist = playlist
     
     def toState(self,state):
@@ -60,6 +62,13 @@ class PlayBack:
     
     def getState(self):
         return self.state
+    
+    def getVolume(self):
+        return self.volume
+    
+    def setVolume(self, volume=50):
+        self.volume = volume
+        self.mediaPlayer.SetVolume(self.volume)
     
     # media player contrl, play, pause, stop, ff, fb, volume
     def play(self):
