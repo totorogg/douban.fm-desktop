@@ -245,9 +245,10 @@ class MainWin(wx.Panel):
         #saving current sate
         state = self.playback.getState()
         
-        self.playback.stop()
+        #self.playback.stop()
         if state == PlayBack.PLAYER_STATE_PLAYING:
-            self.onPlay(None)
+            #self.onPlay(None)
+            self.loadNextSong()
         
         self.UIUpdate()
         

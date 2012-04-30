@@ -67,20 +67,58 @@ class PlayBack:
         self.state = state
     
     def getState(self):
+        '''
+        Get the current state of player.
+        return value is
+                        [
+                            PLAYER_STATE_IDLE       = 0
+                            PLAYER_STATE_LOADING    = 1
+                            PLAYER_STATE_LOADED     = 2
+                            PLAYER_STATE_PLAYING    = 3
+                            PLAYER_STATE_PAUSED     = 4
+                            PLAYER_STATE_STOPPED    = 5
+                            PLAYER_STATE_SONGEND    = 6                            
+                        ]
+        '''
         return self.state
     
     def getTextState(self, state):
+        '''
+        Get the current state of player.
+        return value is
+                        [
+                            'IDLE'     TO PLAYER_STATE_IDLE       = 0
+                            'LOADING'  TO PLAYER_STATE_LOADING    = 1
+                            'LOADED'   TO PLAYER_STATE_LOADED     = 2
+                            'PLAYING'  TO PLAYER_STATE_PLAYING    = 3
+                            'PAUSED'   TO PLAYER_STATE_PAUSED     = 4
+                            'STOPPED'  TO PLAYER_STATE_STOPPED    = 5
+                            'SONGED'   TO PLAYER_STATE_SONGEND    = 6
+                        ]
+        '''
         return PlayBack.text_state[state]
     
     def getVolume(self):
+        '''
+        Get the current volume.
+        return value scale [0,1] type float. 0 stand for mute.
+        '''
         return self.volume
     
     def setVolume(self, volume=50):
+        '''
+        Set the volume.
+        set the volume, scale [0,1].
+        '''
         self.volume = volume
         self.mediaPlayer.SetVolume(self.volume * 0.01)
     
     # media player contrl, play, pause, stop, ff, fb, volume
     def play(self):
+        '''
+        Play the current track.
+        It work only in state [PLAYER_STATE_PAUSED, PLAYER_STATE_LOADING, PLAYER_STATE_STOPPED]
+        '''
 #        if (self.state == PlayBack.PLAYER_STATE_LOADED or self.state == PlayBack.PLAYER_STATE_PLAYING or self.state == PlayBack.PLAYER_STATE_PAUSED):
             #if not self.mediaPlayer.Play():
             #    wx.MessageBox("playing error", "ERROR", wx.ICON_ERROR | wx.OK)
@@ -95,10 +133,18 @@ class PlayBack:
         pass
 
     def pause(self):
+        '''
+        Pause the current track.
+        It works only in state [PLAYER_STATE_PLAYING]
+        '''
         self.mediaPlayer.Pause()
         self.toState(PlayBack.PLAYER_STATE_PAUSED)
         
     def stop(self):
+        '''
+        Stop the current track.
+        It works only in state [PLAYER_STATE_PLAYING, PLAYER_STATE_PAUSED, PLAYER_STATE_LOADING]
+        '''
         self.mediaPlayer.Stop()
         self.toState(PlayBack.PLAYER_STATE_STOPPED)
         
@@ -116,6 +162,9 @@ class PlayBack:
         pass
     
     def get_passtime(self):
+        '''
+        Get the point of the track playing.
+        '''
         offset = self.mediaPlayer.Tell()
         return offset
     
@@ -123,6 +172,9 @@ class PlayBack:
         return self.length
     
     def set_passtime(self, offset):
+        '''
+        Set the point of the track where start to play.
+        '''
         self.mediaPlayer.Seek(offset)
         pass
     
@@ -130,6 +182,7 @@ class PlayBack:
     #help functions
     def load(self, song):
         """
+        Load the song. When loaded, play it.
         """
         if not self.mediaPlayer.LoadURI(song):
             wx.MessageBox("Error in Loading [%s]" % song,
