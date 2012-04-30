@@ -75,12 +75,11 @@ class MainWin(wx.Panel):
     
     
     def createStatusBar(self):
+        """
+        four field: channel, singer, song, state
+        """
         self.statusbar = self.frame.CreateStatusBar(number=4)
-        #self.statusbar.SetStatusText("channel", 0)
-        #self.statusbar.SetStatusText("singer", 1)
-        #self.statusbar.SetStatusText("song", 2)
-        #self.statusbar.SetStatusText("status", 3)
-        self.statusbar.SetStatusWidths([-1, -1, -3, -1])
+        self.statusbar.SetStatusWidths([-2, -2, -5, -3])
         self.updateStatusBar()
         pass
     
@@ -112,11 +111,11 @@ class MainWin(wx.Panel):
         self.mainwin_pause = wx.Button(self, -1, "||", size=(36,24))
         self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
 
-        self.mainwin_volume = wx.Slider(self, size=(240,24))
+        self.mainwin_volume = wx.Slider(self, size=(220,24))
         self.mainwin_volume.SetRange(0, 100)
         self.mainwin_volume.SetValue(50)
         
-        self.mainwin_seeking = wx.Slider(self, size=(240,24))
+        self.mainwin_seeking = wx.Slider(self, size=(220,24))
         #
         #self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
         #self.mainwin_album = wx.StaticText(self, -1, size=(120,24))

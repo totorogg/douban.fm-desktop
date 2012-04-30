@@ -11,6 +11,7 @@ import random
 import urllib
 import urllib2
 import json
+import wx
 
 class DoubanProtocol:
     """
@@ -40,7 +41,8 @@ class DoubanProtocol:
         assert req.code == 200
         
         obj = json.load(req)
-        assert obj['r'] == 0
+        if obj['r'] != 0:
+            wx.MessageBox("Get New PlayList Error", "ERROR", wx.ICON_ERROR | wx.OK)
         #print obj
         # for test
         #for s in obj['song']:
