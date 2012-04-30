@@ -136,6 +136,8 @@ class MainWin(wx.Panel):
     
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
+        self.mainwin_pause.Bind(wx.EVT_BUTTON, self.onPause)
+        self.mainwin_stop.Bind(wx.EVT_BUTTON, self.onStop)
         self.mainwin_volume.Bind(wx.EVT_SLIDER, self.onSetVolume)
         self.mainwin_seeking.Bind(wx.EVT_SLIDER, self.onSeek)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
@@ -178,7 +180,13 @@ class MainWin(wx.Panel):
         else:
             self.playback.play()
         pass
-        
+    
+    def onPause(self, event):
+        self.playback.pause()
+    
+    def onStop(self, event):
+        self.playback.stop()
+    
     def loadNextSong(self):
         song = self.doubanPlayList.nextSong()
         print song['url']
