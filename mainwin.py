@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python
+#!/usr/bin/python
 # coding=utf-8
 
 #----------------------------------------------------------------------
@@ -29,7 +29,8 @@ class MainWin(wx.Panel):
         self.frame = parent
         
         self.douban = DoubanProtocol()
-        self.playback = PlayBack(self)
+        self.doubanPlayList = DoubanPlayList()
+        self.playback = PlayBack(self, self.doubanPlayList)
         
         self.createAllWidgets()
         self.layoutWidgets()
@@ -39,13 +40,7 @@ class MainWin(wx.Panel):
         
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer)
-        self.timer.Start(1000)
-        
-        
-        # hard coding for test
-        # 0 int, 1 play, 2 pause, 3 stop
-        #self.state = 0
-
+        self.timer.Start(100)
     
     def createMenuBar(self):
         """
@@ -68,7 +63,7 @@ class MainWin(wx.Panel):
             menu_item = fmMenu.Append(channel, channelList[channel], channelList[channel], wx.ITEM_RADIO)
             self.frame.Bind(wx.EVT_MENU, self.onChangeChannel, menu_item)
         
-        self.doubanPlayList = DoubanPlayList()
+        #self.doubanPlayList = DoubanPlayList()
         #self.doubanPlayList.changeChannel(channel)
         #open_douban_menu_item = fileMenu.Append(wx.NewId(), "&douban.fm", "Play douban.fm")
         #self.frame.Bind(wx.EVT_MENU, self.onRequestAudio, open_douban_menu_item)
@@ -100,12 +95,13 @@ class MainWin(wx.Panel):
         #self.statusbar.SetStatusText("channel", 0)
     
     def createStatusBar(self):
-        self.statusbar = self.frame.CreateStatusBar(number=3)
-        self.statusbar.SetStatusText("channel", 0)
-        self.statusbar.SetStatusText("song", 1)
-        self.statusbar.SetStatusText("status", 2)
-        self.statusbar.SetStatusWidths([-1, -3, -1])
-        self.statusbar.SetStatusText("Playing", 2)
+        self.statusbar = self.frame.CreateStatusBar(number=4)
+        #self.statusbar.SetStatusText("channel", 0)
+        #self.statusbar.SetStatusText("singer", 1)
+        #self.statusbar.SetStatusText("song", 2)
+        #self.statusbar.SetStatusText("status", 3)
+        self.statusbar.SetStatusWidths([-1, -1, -3, -1])
+        #self.statusbar.SetStatusText("Playing", 3)
         pass
     
     
@@ -113,25 +109,22 @@ class MainWin(wx.Panel):
         # playback
         self.mainwin_rew = wx.Button(self, -1, "|<", size=(36,24))
         self.mainwin_fwd = wx.Button(self, -1, ">|", size=(36,24))
-        self.mainwin_eject = wx.Button(self, -1, u"△", size=(36,24))
+        self.mainwin_eject = wx.Button(self, -1, u"?", size=(36,24))
         self.mainwin_play = wx.Button(self, -1, ">", size=(36,24))
         self.mainwin_pause = wx.Button(self, -1, "||", size=(36,24))
-        self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
+        self.mainwin_stop = wx.Button(self, -1, u"?", size=(36,24))
 
         self.mainwin_volume = wx.Slider(self, size=(240,24))
+        self.mainwin_volume.SetRange(0, 100)
+        self.mainwin_volume.SetValue(50)
+        
         self.mainwin_seeking = wx.Slider(self, size=(240,24))
         #
-        self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
-        self.mainwin_album = wx.StaticText(self, -1, size=(120,24))
-        self.mainwin_tsong = wx.StaticText(self, -1, "Volume", size=(60,24))
-        self.mainwin_tseeking = wx.StaticText(self, -1, "Position", size=(60,24))
+        #self.mainwin_singer = wx.StaticText(self, -1, size=(120,24))
+        #self.mainwin_album = wx.StaticText(self, -1, size=(120,24))
+        self.mainwin_tsong = wx.StaticText(self, -1, "Volume[50 - 100]", size=(120,24))
+        self.mainwin_tseeking = wx.StaticText(self, -1, "Position[00:00 - 00:00]", size=(120,24))
         
-        try:
-            self.mediaPlayer = wx.media.MediaCtrl(self, style=wx.SIMPLE_BORDER, szBackend=wx.media.MEDIABACKEND_WMP10)
-            #self.Bind(wx.media.EVT_MEDIA_FINISHED, self.onSongEnd, self.mediaPlayer)
-        except NotImplementedError:
-            self.Destroy()
-            raise
         pass
     
     def layoutWidgets(self):
@@ -165,76 +158,76 @@ class MainWin(wx.Panel):
     
     def bindWidgetsEvent(self):
         self.mainwin_play.Bind(wx.EVT_BUTTON, self.onPlay)
+        self.mainwin_volume.Bind(wx.EVT_SLIDER, self.onSetVolume)
+        self.mainwin_seeking.Bind(wx.EVT_SLIDER, self.onSeek)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
+        self.mainwin_fwd.Bind(wx.EVT_BUTTON, self.onFwd)
+    
+    
+#------------------------------------------------------------------------------#
+    
+    def onTimer(self, event):
+        state = self.playback.getState()
+        #
+        if state == PlayBack.PLAYER_STATE_SONGEND:
+            self.loadNextSong()
+        
+        #show the volume
+        #show current position
+        offset = self.playback.get_passtime()
+        length = self.playback.get_length()
+        self.mainwin_seeking.SetValue(offset)
+        sec_length = int(length / 1000.0)
+        sec_offset = int(offset / 1000.0)
+        self.mainwin_tseeking.SetLabel("Position[%d:%02d - %d:%02d]" % (sec_offset/60, sec_offset%60, sec_length/60, sec_length%60))
+        
+        #update status bar
+        self.statusbar.SetStatusText(self.douban.getChannelList()[self.doubanPlayList.channel], 0)
+        song = self.doubanPlayList.currentSong()
+        if song == None:
+            self.statusbar.SetStatusText("", 1)
+            self.statusbar.SetStatusText("", 2)
+        else:
+            self.statusbar.SetStatusText(song['artist'], 1)
+            self.statusbar.SetStatusText(song['title'], 2)
+        self.statusbar.SetStatusText(self.playback.getTextState(state), 3)
         pass
     
-    
-    
-    
-    
-    def OnMediaLoaded(self, event):
-        print "Loading ----> Loaded"
-        self.startPlay()
-    
-    def startPlay(self):
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-#        while self.mediaPlayer.GetState() == -1:
-#            time.sleep(1)
-        if not self.mediaPlayer.Play():
-            print "MC.Play Error"
- #           wx.MessageBox("Unable to Play media : Unsupported format?",
- #                         "ERROR",
- #                         wx.ICON_ERROR | wx.OK)
-        else:
-            self.mediaPlayer.SetInitialSize()
-            self.GetSizer().Layout()
-            self.playbackSlider.SetRange(0, self.mediaPlayer.Length())
-            
-    
-    
     def onPlay(self, event):
-        """
-        Plays the music
-        """
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-
-#        if not event.GetIsDown():
-#            self.onPause(event)
-#            return
+        state = self.playback.getState()
+        if state == PlayBack.PLAYER_STATE_IDLE or state == PlayBack.PLAYER_STATE_STOPPED:
+            self.loadNextSong()
+        else:
+            self.playback.play()
+        pass
         
-        # if not load the song, loading
-        if (self.state == 0): #init state
-            self.state = 1
-            self.loadNextAudio()
-#        time.sleep(3)    
-#        self.startPlay()
-#        event.Skip()
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-
-        return True
+    def loadNextSong(self):
+        song = self.doubanPlayList.nextSong()
+        print song['url']
+        self.playback.load(song['url'])
     
-    def loadNextAudio(self):
+    def onSetVolume(self, event):
         """
+        Sets the volume of the music player
         """
+        currentVolume = self.mainwin_volume.GetValue()
+        print "setting volume to: %s" % int(currentVolume)
+        self.playback.setVolume(currentVolume)
+        self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
+    
+    def onSeek(self, event):
+        """
+        Seeks the media file according to the amount the slider has
+        been adjusted.
+        """
+        offset = self.mainwin_seeking.GetValue()
+        self.playback.set_passtime(offset)
+        pass
         
-        if self.state == 1: # on playing
-            song = self.doubanPlayList.nextSong()
-            print song['url']
-            if not self.mediaPlayer.LoadURI(song['url']):
-                wx.MessageBox("Unable to load %s: Unsupported format?" % song['url'],
-                          "ERROR",
-                          wx.ICON_ERROR | wx.OK)
-#            self.mediaPlayer.Play()
-
+    def onFwd(self, event):
+        '''
+        Play Next Track
+        '''
+        song = self.doubanPlayList.nextSong()
+        self.playback.play(song['url'])
+        pass
