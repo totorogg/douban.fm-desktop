@@ -41,6 +41,10 @@ class PlayBack:
     PLAYER_STATE_STOPPED    = 5
     PLAYER_STATE_SONGEND    = 6
     
+    text_state = ("IDLE","LOADING","LOADED",\
+                  "PLAYING","PAUSED","STOPPED",\
+                  "SONGEND")
+    
     def __init__(self, parent, playlist):
         # create the media ctrl object
         try:
@@ -64,6 +68,9 @@ class PlayBack:
     
     def getState(self):
         return self.state
+    
+    def getTextState(self, state):
+        return PlayBack.text_state[state]
     
     def getVolume(self):
         return self.volume

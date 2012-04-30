@@ -63,7 +63,7 @@ class MainWin(wx.Panel):
             menu_item = fmMenu.Append(channel, channelList[channel], channelList[channel], wx.ITEM_RADIO)
             self.frame.Bind(wx.EVT_MENU, self.onChangeChannel, menu_item)
         
-        self.doubanPlayList = DoubanPlayList()
+        #self.doubanPlayList = DoubanPlayList()
         #self.doubanPlayList.changeChannel(channel)
         #open_douban_menu_item = fileMenu.Append(wx.NewId(), "&douban.fm", "Play douban.fm")
         #self.frame.Bind(wx.EVT_MENU, self.onRequestAudio, open_douban_menu_item)
@@ -95,12 +95,13 @@ class MainWin(wx.Panel):
         #self.statusbar.SetStatusText("channel", 0)
     
     def createStatusBar(self):
-        self.statusbar = self.frame.CreateStatusBar(number=3)
-        self.statusbar.SetStatusText("channel", 0)
-        self.statusbar.SetStatusText("song", 1)
-        self.statusbar.SetStatusText("status", 2)
-        self.statusbar.SetStatusWidths([-1, -3, -1])
-        self.statusbar.SetStatusText("Playing", 2)
+        self.statusbar = self.frame.CreateStatusBar(number=4)
+        #self.statusbar.SetStatusText("channel", 0)
+        #self.statusbar.SetStatusText("singer", 1)
+        #self.statusbar.SetStatusText("song", 2)
+        #self.statusbar.SetStatusText("status", 3)
+        self.statusbar.SetStatusWidths([-1, -1, -3, -1])
+        #self.statusbar.SetStatusText("Playing", 3)
         pass
     
     
@@ -179,6 +180,17 @@ class MainWin(wx.Panel):
         sec_length = int(length / 1000.0)
         sec_offset = int(offset / 1000.0)
         self.mainwin_tseeking.SetLabel("Position[%d:%02d - %d:%02d]" % (sec_offset/60, sec_offset%60, sec_length/60, sec_length%60))
+        
+        #update status bar
+        self.statusbar.SetStatusText(self.douban.getChannelList()[self.doubanPlayList.channel], 0)
+        song = self.doubanPlayList.currentSong()
+        if song == None:
+            self.statusbar.SetStatusText("", 1)
+            self.statusbar.SetStatusText("", 2)
+        else:
+            self.statusbar.SetStatusText(song['artist'], 1)
+            self.statusbar.SetStatusText(song['title'], 2)
+        self.statusbar.SetStatusText(self.playback.getTextState(state), 3)
         pass
     
     def onPlay(self, event):

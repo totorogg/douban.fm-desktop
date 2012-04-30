@@ -17,7 +17,7 @@ class DoubanPlayList:
     def __init__(self, channel = 1):
         self.channel = channel
         self.length = 0
-        self.currentSong = 0
+        self.currentSongIndex = 0
         # protocol to get the list
         self.douban = DoubanProtocol()
         self.playlist = self.nextPlayList()
@@ -26,15 +26,22 @@ class DoubanPlayList:
     def nextPlayList(self):
         playlist = self.douban.getNewPlayList(self.channel)
         self.length = len(playlist)
-        self.currentSong = 0
+        self.currentSongIndex = 0
         
         return playlist
     #
     def nextSong(self):
-        if self.currentSong >= self.length:
+        if self.currentSongIndex >= self.length:
             self.playlist = self.nextPlayList()
-        song = self.playlist[self.currentSong]
-        self.currentSong += 1
+        song = self.playlist[self.currentSongIndex]
+        self.currentSongIndex += 1
+        return song
+        
+    def currentSong(self):
+        #print self.currentSongIndex, self.length
+        if self.currentSongIndex == 0:
+            return None
+        song = self.playlist[self.currentSongIndex-1]
         return song
         
     def previousSong(self):
@@ -44,6 +51,7 @@ class DoubanPlayList:
     def changeChannel(self, channel):
         self.channel = channel
         self.playlist = self.nextPlayList()
+    
     
 """
 class for the song
