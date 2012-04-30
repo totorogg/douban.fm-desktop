@@ -1,4 +1,4 @@
-#!/usr/bin/python
+﻿#!/usr/bin/python
 # coding=utf-8
 
 #----------------------------------------------------------------------
@@ -41,6 +41,8 @@ class MainWin(wx.Panel):
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer)
         self.timer.Start(100)
+        
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
     
     def createMenuBar(self):
         """
@@ -87,10 +89,10 @@ class MainWin(wx.Panel):
         # playback
         self.mainwin_rew = wx.Button(self, -1, "|<", size=(36,24))
         self.mainwin_fwd = wx.Button(self, -1, ">|", size=(36,24))
-        self.mainwin_eject = wx.Button(self, -1, u"?", size=(36,24))
+        self.mainwin_eject = wx.Button(self, -1, u"E", size=(36,24))
         self.mainwin_play = wx.Button(self, -1, ">", size=(36,24))
         self.mainwin_pause = wx.Button(self, -1, "||", size=(36,24))
-        self.mainwin_stop = wx.Button(self, -1, u"?", size=(36,24))
+        self.mainwin_stop = wx.Button(self, -1, u"口", size=(36,24))
 
         self.mainwin_volume = wx.Slider(self, size=(240,24))
         self.mainwin_volume.SetRange(0, 100)
@@ -142,9 +144,14 @@ class MainWin(wx.Panel):
         self.mainwin_seeking.Bind(wx.EVT_SLIDER, self.onSeek)
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         self.mainwin_fwd.Bind(wx.EVT_BUTTON, self.onFwd)
+        
     
     
 #------------------------------------------------------------------------------#
+    
+    def OnClose(self, event):
+        self.timer.stop()
+        pass
     
     def onTimer(self, event):
         state = self.playback.getState()
