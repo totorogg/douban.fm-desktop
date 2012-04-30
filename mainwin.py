@@ -29,7 +29,8 @@ class MainWin(wx.Panel):
         self.frame = parent
         
         self.douban = DoubanProtocol()
-        self.playback = PlayBack(self)
+        self.doubanPlayList = DoubanPlayList()
+        self.playback = PlayBack(self, self.doubanPlayList)
         
         self.createAllWidgets()
         self.layoutWidgets()
@@ -39,13 +40,7 @@ class MainWin(wx.Panel):
         
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer)
-        self.timer.Start(1000)
-        
-        
-        # hard coding for test
-        # 0 int, 1 play, 2 pause, 3 stop
-        #self.state = 0
-
+        self.timer.Start(100)
     
     def createMenuBar(self):
         """
@@ -168,73 +163,23 @@ class MainWin(wx.Panel):
         #self.mediaPlayer.Bind(wx.media.EVT_MEDIA_LOADED, self.OnMediaLoaded)
         pass
     
-    
-    
-    
-    
-    def OnMediaLoaded(self, event):
-        print "Loading ----> Loaded"
-        self.startPlay()
-    
-    def startPlay(self):
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-#        while self.mediaPlayer.GetState() == -1:
-#            time.sleep(1)
-        if not self.mediaPlayer.Play():
-            print "MC.Play Error"
- #           wx.MessageBox("Unable to Play media : Unsupported format?",
- #                         "ERROR",
- #                         wx.ICON_ERROR | wx.OK)
-        else:
-            self.mediaPlayer.SetInitialSize()
-            self.GetSizer().Layout()
-            self.playbackSlider.SetRange(0, self.mediaPlayer.Length())
-            
-    
+    def onTimer(self, event):
+        state = self.playback.getState()
+        #
+        if state == PlayBack.PLAYER_STATE_SONGEND:
+            self.loadNextSong()
+        pass
     
     def onPlay(self, event):
-        """
-        Plays the music
-        """
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-
-#        if not event.GetIsDown():
-#            self.onPause(event)
-#            return
+        state = self.playback.getState()
+        if state == PlayBack.PLAYER_STATE_IDLE or state == PlayBack.PLAYER_STATE_STOPPED:
+            self.loadNextSong()
+        else:
+            self.playback.play()
+        pass
         
-        # if not load the song, loading
-        if (self.state == 0): #init state
-            self.state = 1
-            self.loadNextAudio()
-#        time.sleep(3)    
-#        self.startPlay()
-#        event.Skip()
-        i = self.mediaPlayer.GetDownloadProgress()
-        j = self.mediaPlayer.GetState()
-        k = self.mediaPlayer.GetDownloadTotal()
-        print "STATE:MEDIASTATE_STOPPED:%d MEDIASTATE_PAUSED:%d MEDIASTATE_PLAYING:%d" %(wx.media.MEDIASTATE_STOPPED, wx.media.MEDIASTATE_PAUSED, wx.media.MEDIASTATE_PLAYING)
-        print "GetDownloadProgress:%d GetDownloadTotal:%d GetState:%d"  %(i, k, j)
-
-        return True
-    
-    def loadNextAudio(self):
-        """
-        """
+    def loadNextSong(self):
+        song = self.doubanPlayList.nextSong()
+        print song['url']
+        self.playback.load(song['url'])
         
-        if self.state == 1: # on playing
-            song = self.doubanPlayList.nextSong()
-            print song['url']
-            if not self.mediaPlayer.LoadURI(song['url']):
-                wx.MessageBox("Unable to load %s: Unsupported format?" % song['url'],
-                          "ERROR",
-                          wx.ICON_ERROR | wx.OK)
-#            self.mediaPlayer.Play()
-
