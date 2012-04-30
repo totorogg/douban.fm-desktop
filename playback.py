@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python
+#!/usr/bin/python
 # coding=utf-8
 
 #----------------------------------------------------------------------
@@ -104,7 +104,7 @@ class PlayBack:
         if not self.mediaPlayer.LoadURI(song):
             print "Error in Loading [%s]" % song
         else:
-            self.parent.Refresh()
+#            self.parent.Refresh()
             self.toState(PLAYER_STATE_LOADING)
         
     def loadAndPlay(self, song):
