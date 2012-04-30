@@ -212,7 +212,7 @@ class MainWin(wx.Panel):
         """
         currentVolume = self.mainwin_volume.GetValue()
         print "setting volume to: %s" % int(currentVolume)
-        self.playback.setVolume(currentVolume)
+        self.playback.setVolume(currentVolume * 0.01)
         self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
     
     def onSeek(self, event):
@@ -229,5 +229,8 @@ class MainWin(wx.Panel):
         Play Next Track
         '''
         song = self.doubanPlayList.nextSong()
-        self.playback.play(song['url'])
+        self.playback.load(song['url'])
+        #
+        #update the GUI 
+        #
         pass

@@ -81,16 +81,18 @@ class PlayBack:
     
     # media player contrl, play, pause, stop, ff, fb, volume
     def play(self):
-        if (self.state == PlayBack.PLAYER_STATE_LOADED or self.state == PlayBack.PLAYER_STATE_PLAYING or self.state == PlayBack.PLAYER_STATE_PAUSED):
+#        if (self.state == PlayBack.PLAYER_STATE_LOADED or self.state == PlayBack.PLAYER_STATE_PLAYING or self.state == PlayBack.PLAYER_STATE_PAUSED):
             #if not self.mediaPlayer.Play():
             #    wx.MessageBox("playing error", "ERROR", wx.ICON_ERROR | wx.OK)
             #else:
             #    pass
             
             # always success
-            self.mediaPlayer.Play()
-            self.toState(PlayBack.PLAYER_STATE_PLAYING)
-            pass
+#            self.mediaPlayer.Play()
+#            self.toState(PlayBack.PLAYER_STATE_PLAYING)
+        self.mediaPlayer.Play()
+        self.toState(PlayBack.PLAYER_STATE_PLAYING)
+        pass
 
     def pause(self):
         self.mediaPlayer.Pause()
