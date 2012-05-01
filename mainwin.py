@@ -17,6 +17,7 @@ import wx.media
 from douban import DoubanProtocol
 from douban_playlist import DoubanPlayList
 from playback import PlayBack
+from cfgmanage import CfgManage
 
 class MainWin(wx.Panel):
     """
@@ -31,6 +32,7 @@ class MainWin(wx.Panel):
         self.douban = DoubanProtocol()
         self.doubanPlayList = DoubanPlayList()
         self.playback = PlayBack(self, self.doubanPlayList)
+        self.cfgmanage = CfgManage()
         
         self.createAllWidgets()
         self.layoutWidgets()
@@ -38,11 +40,15 @@ class MainWin(wx.Panel):
         self.createMenuBar()
         self.createStatusBar()
         
+        self.initUserSetting()
+        
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer)
         self.timer.Start(100)
         
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        
+
     
     def createMenuBar(self):
         """
@@ -101,6 +107,14 @@ class MainWin(wx.Panel):
         self.updateStatusBar()
         pass
     
+    def initUserSetting(self):
+        
+        self.doubanPlayList.changeChannel(self.cfgmanage.getChannel())
+        
+        currentVolume = self.cfgmanage.getVolume()
+        self.setVolume(currentVolume)
+        self.mainwin_volume.SetValue(currentVolume)
+        
     
     def createAllWidgets(self):
         # playback
@@ -210,15 +224,22 @@ class MainWin(wx.Panel):
         self.UIUpdate()
         
         
-    
+    def setVolume(self,v):
+        print "setting volume to: %s" % int(v)
+        self.cfgmanage.setVolume(v)
+        self.playback.setVolume(v)
+        self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (v, 100))
+        
     def onSetVolume(self, event):
         """
         Sets the volume of the music player
         """
         currentVolume = self.mainwin_volume.GetValue()
-        print "setting volume to: %s" % int(currentVolume)
-        self.playback.setVolume(currentVolume)
-        self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
+        self.setVolume(currentVolume)
+        #print "setting volume to: %s" % int(currentVolume)
+        #self.cfgmanage.setVolume(currentVolume)
+        #self.playback.setVolume(currentVolume)
+        #self.mainwin_tsong.SetLabel("Volume[%d - %d]" % (currentVolume, 100))
     
     def onSeek(self, event):
         """
@@ -237,6 +258,7 @@ class MainWin(wx.Panel):
         #self.channel = event.GetId()
         channel = event.GetId()
         self.doubanPlayList.changeChannel(channel)
+        self.cfgmanage.setChannel(channel)
         #menu_item = self.frame.GetMenuBar().FindItemById(channel)
         #self.statusbar.SetStatusText(menu_item.GetLabel(), 0)
         #if state == PlayBack.PLAYER_STATE_SONGEND:

@@ -34,10 +34,10 @@ class CfgManage:
 #        self.store()
                     
     def getVolume(self):
-        return self.volume
+        return int(self.volume)
 
     def getChannel(self):
-        return self.channel
+        return int(self.channel)
 
     def setVolume(self, v):
         self.volume = v
